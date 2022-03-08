@@ -1,0 +1,33 @@
+<html>
+	<head>
+		<title>Instagram page stats</title>
+	</head>	
+	
+	<body>
+		
+	<table id="stats">
+		{% for row in page_stats %}
+		<tr>
+			{% for value  in row %}
+			<td> {{value}}	</td>
+			{% endfor %}		
+		</tr>
+	{% endfor %}
+		
+    </table>
+	
+	<input type=button value="Copy to Clipboard" onClick="copytable('stats')">
+
+	<script type="text/javascript">
+
+		function copytable(el) {
+			var urlField = document.getElementById(el)   
+			var range = document.createRange()
+			range.selectNode(urlField)
+			window.getSelection().addRange(range) 
+			document.execCommand('copy')
+		}	
+	</script>
+
+	</body>
+	</html>
