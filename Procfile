@@ -1,1 +1,1 @@
-web: gunicorn Instagram_page_stats.wsgi --log-file -
+wweb: gunicorn Instagram_page_stats.wsgi --log-file -
