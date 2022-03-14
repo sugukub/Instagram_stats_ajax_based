@@ -1,0 +1,233 @@
+<html>
+	<head>
+		<title>Instagram page stats</title>
+	</head>	
+	<style>	
+			
+		body
+		{
+			font-family: 'Poppins', sans-serif;
+			background: radial-gradient(#F3FFFF,#E8E8E8);
+			font-size: 16px;
+			font-family: 'Poppins', sans-serif;
+		}
+
+        .tiles_block
+        {
+            
+            width:800px;
+            margin:auto;
+            margin-top:5%;
+        }
+        
+        .tile 
+        {
+            height: 40%;
+            width : 30%;
+            background: radial-gradient(#F3FFFF,#E8E8E8);
+            margin : auto;
+            float:left;
+            color:black;
+            font-weight: bold;
+        }
+
+        p
+        {
+            text-align:center;
+            padding-left:30%;           
+            padding-top:40%;
+            padding-right:30%;
+            padding-bottom:40%;
+            cursor:pointer;
+        }
+		</style>
+	
+	<body>
+	
+	<link rel="preconnect" href="https://fonts.googleapis.com">
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+	<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300&display=swap" rel="stylesheet">
+
+	<div class = "tiles_block">
+        <a href = "page_stats">
+            <div class = "tile">
+                <p>Page stats</p>
+            </div>
+        </a>
+
+        <a href = "post_stats">
+            <div class = "tile">
+                <p>Post stats</p>
+            </div>
+        </a>
+        
+        <a onclick = "read_clipboard('extract_names')">
+            <div class = "tile">
+                <p>Name extractor</p>
+            </div>
+        </a>
+            
+        <a onclick = "read_clipboard('k_into_numbers')">
+            <div class = "tile">
+                <p>K into numbers</p>
+            </div>
+        </a>
+        
+        <a onclick = "read_clipboard('numbers_into_k')">
+            <div class = "tile">
+                <p>Numbers into K</p>
+            </div>
+        </a>
+            
+
+    </div>
+	
+	<script type="text/javascript">
+        function read_clipboard(task)
+        {
+            navigator.clipboard.readText()
+        .then(text => {
+            console.log('Pasted content: ', text);
+            if(task == 'extract_names')
+            {
+                extract_names(text);
+            }
+            
+            else if(task == 'numbers_into_k')
+            {
+                numbers_into_k(text);
+            }
+            
+            else if (task == 'k_into_numbers')
+            {   
+                k_into_numbers(text);
+            }
+        })
+        .catch(err => {
+            console.error('Failed to read clipboard contents: ', err);
+        });
+        }
+
+        function extract_names(input_text)
+        {
+            input_text = input_text.split("\n");
+            final_string = "";
+            for(let i=0;i<input_text.length;i++)
+            {
+                var link = input_text[i];
+
+                if(link.includes("twitter.com"))
+                {
+                    var name = link.split("twitter.com/");
+                    
+                    name = name[1];
+                    
+                }
+
+                else if(link.includes("instagram.com"))
+                {
+                    var name = link.split("instagram.com/");
+                    name = name[1];   
+                }
+                else
+                {
+                    name = input_text[i];
+                }
+
+                if(name.includes("/"))
+                {
+                    name = name.split("/")[0];
+                }
+                
+                if(name.includes("?"))
+                {
+                    name = name.split("?")[0];
+                }
+                
+                final_string += name + "\n";
+                
+            }
+
+            copyToClipboard(final_string);
+        }
+
+        
+        function k_into_numbers(input_text)
+        {
+            input_text = input_text.split("\n");
+            final_string = "";
+            for(let i=0;i<input_text.length;i++)
+            {
+                var value = input_text[i];
+                value = value.toLowerCase();
+
+                if(value.includes("k"))
+                {
+                    value.replace("k","m");
+                    value = parseFloat(value);
+                    value = value * 1000;
+                }
+                
+                else if(value.includes("m"))
+                {
+                    value.replace("m","");
+                    value = parseFloat(value);
+                    value = value * 1000000;
+                }
+                
+                value = value.toString();
+                
+                final_string += value + "\n";
+                
+            }
+
+            copyToClipboard(final_string);
+        }
+
+        
+        function numbers_into_k(input_text)
+        {
+            input_text = input_text.split("\n");
+            final_string = "";
+            for(let i=0;i<input_text.length;i++)
+            {
+                var value = input_text[i];
+                value = parseFloat(value);
+                
+                if(value > 1000000)
+                {
+                    value = value/1000000;
+                    value = value.toString();
+                    value = value + "m";
+                }
+                else if( ( value > 10000) && (value < 1000000))
+                {
+                    value = value/1000;
+                    value = value.toString();
+                    value = value + "k";   
+                }
+
+                value = value.toString();
+                
+                final_string += value + "\n";
+                
+            }
+            
+            copyToClipboard(final_string);
+        }
+
+        function copyToClipboard(text) {
+            
+            var dummy = document.createElement("textarea");
+            document.body.appendChild(dummy);
+            dummy.value = text;
+          
+            dummy.select();
+            document.execCommand("copy");
+            document.body.removeChild(dummy);
+        }
+        
+	</script>
+
+	</body>
+	</html>

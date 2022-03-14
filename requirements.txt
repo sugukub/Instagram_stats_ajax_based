@@ -15,3 +15,8 @@ pyperclip == 1.8.2
 
 # C:\Users\Sudhanva\Desktop\Projects\Instagram Pages Stats collector\Instagram_page_stats\page_stats\instagram_page_stats.py: 4
 requests == 2.25.1
+
+gunicorn == 20.1.0
+
+whitenoise == 6.0.0
+

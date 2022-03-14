@@ -5,6 +5,27 @@ import requests
 from datetime import datetime
 import time
 
+def numbers_into_k(val):
+    val = str(val.replace(",",""))
+    
+    try:
+        val = float(val)
+        if val > 10000:
+            val = val/1000
+            val = float("{:.1f}".format(val))
+            if val > 1000:
+                val = float(val/1000)
+                val = float("{:.1f}".format(val))
+                val = str(val) + "m"
+            else:
+                val = str(val) + "k"
+        else:
+            val = str(val)
+    except:
+        val = str(val)
+    
+    return val
+
 
 def get_account_stats(link,session):
     
@@ -27,9 +48,13 @@ def get_account_stats(link,session):
     likes_array = []
     comments_array = []
     
-    
     try:
         is_private = link_response['graphql']['user']['is_private']
+        if is_private:
+            is_private = "Private"
+        else:
+            is_private = "Public"
+
     except:
         is_private = "Not available"
     
@@ -38,6 +63,7 @@ def get_account_stats(link,session):
         followers = link_response['graphql']['user']['edge_followed_by']['count']    
     except:
         followers = "Not available"
+    
     
     try:
         full_name = link_response['graphql']['user']['full_name']
@@ -50,20 +76,23 @@ def get_account_stats(link,session):
             likes_array.append(post['node']['edge_liked_by']['count'])
         
         average_likes = int(sum(likes_array)/len(likes_array))
-        
         for post in link_response['graphql']['user']['edge_owner_to_timeline_media']['edges']:
             comments_array.append(post['node']['edge_media_to_comment']['count'])
         
         average_comments = int(sum(comments_array)/len(comments_array))
         average_engagement_rate = (average_comments + average_likes) / followers * 100
+        average_engagement_rate = round(average_engagement_rate, 2)
         
+
     except:
         
         average_likes = "Not available"
         average_comments = "Not available"
         average_engagement_rate = "Not available"
     
-    return full_name,is_private,page_url,followers,average_likes,average_comments,average_engagement_rate 
+    followers = numbers_into_k(str(followers))
+    
+    return page_name,is_private,page_url,followers,average_likes,average_comments,average_engagement_rate 
     
 def main_program(input_links, username, password):
     link = 'https://www.instagram.com/accounts/login/'
@@ -81,7 +110,6 @@ def main_program(input_links, username, password):
     'optIntoOneTap': 'false'
     }
 
-    #links_array =  pp.paste()
     links_array = input_links
     links_array = links_array.split("\n")
 
@@ -112,7 +140,7 @@ def main_program(input_links, username, password):
                 final_string = final_string.split("\n")
                 for row in final_string:
                     arr.append(row.split("\t"))
-                #pp.copy(final_string)
+                    #pp.copy(final_string)
                 return arr
                 
             else:

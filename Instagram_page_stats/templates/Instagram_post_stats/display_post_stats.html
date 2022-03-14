@@ -1,6 +1,6 @@
 <html>
 	<head>
-		<title>Instagram page stats</title>
+		<title>Instagram post stats</title>
 	</head>	
 	<style>	
 			
@@ -24,7 +24,7 @@
 			display:block;
 			cursor: pointer;
 			border-radius: 10px;
-			color: rgba(0,0,0,1); 
+			color: rgba(0,0,0,0.5); 
 			border: 1px solid white;
 			background: transparent;
 		}
@@ -38,13 +38,13 @@
 
 		th
 		{
-			color: rgba(0,0,0,0.5); 
+			color: rgba(0,0,0,1); 
 			border: 1px solid white;
 		}
 		td
 		{
 			width : 0.1%;
-			color: rgba(0,0,0,0.5); 
+			color: rgba(0,0,0,1); 
 		}
 		</style>
 	
@@ -62,15 +62,11 @@
 		
 		<table id="stats">
 			
-			<th>Page Name</th>
-			<th>Private/Public</th>
-			<th>Page Link</th>
-			<th>Followers</th>
-			<th>Avg Likes</th>
-			<th>Avg Comments</th>
-			<th>Avg Eng Rate</th>
+			<th>Likes</th>
+			<th>Comments</th>
+			<th>Views count</th>
 
-			{% for row in page_stats %}
+			{% for row in post_stats %}
 				<tr>
 					{% for value  in row %}
 					<td> {{value}}	</td>
