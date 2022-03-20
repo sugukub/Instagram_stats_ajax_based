@@ -1,3 +1,4 @@
+<!DOCTYPE html>
 <html>
 	<head>
 		<title>Instagram post stats</title>
@@ -24,9 +25,10 @@
 			display:block;
 			cursor: pointer;
 			border-radius: 10px;
-			color: rgba(0,0,0,0.5); 
+			color: rgba(0,0,0,1); 
 			border: 1px solid white;
 			background: transparent;
+			display:none;
 		}
 
 		#stats_table table
@@ -38,13 +40,36 @@
 
 		th
 		{
-			color: rgba(0,0,0,1); 
+			color: rgba(0,0,0,0.5); 
 			border: 1px solid white;
 		}
 		td
 		{
 			width : 0.1%;
-			color: rgba(0,0,0,1); 
+			color: rgba(0,0,0,0.5); 
+		}
+			
+		#loader {
+			border: 16px solid #f3f3f3;
+			border-radius: 50%;
+			border-top: 16px solid black;
+			border-bottom: 16px solid black;
+			width: 10px;
+			height: 10px;
+			-webkit-animation: spin 2s linear infinite;
+			animation: spin 2s linear infinite;
+			margin:auto;
+			margin-top:3%;
+		}
+
+		@-webkit-keyframes spin {
+			0% { -webkit-transform: rotate(0deg); }
+			100% { -webkit-transform: rotate(360deg); }
+		}
+		  
+		@keyframes spin {
+			0% { transform: rotate(0deg); }
+			100% { transform: rotate(360deg); }
 		}
 		</style>
 	
@@ -54,39 +79,122 @@
 	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 	<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300&display=swap" rel="stylesheet">
 
+	<div id="loader"></div>
+
 	<div>
-		<input type=button value="Copy to Clipboard" onClick="copytable('stats')" id = "copy_to_cb_button">
+		<input type=button value="Copy to Clipboard" onClick="copytable('stats_table')" id = "copy_to_cb_button">
 	</div>
 
-	<div id = "stats_table">
+	<div id = "stats_table_div">
 		
-		<table id="stats">
+		<table id="stats_table">
 			
-			<th>Likes</th>
-			<th>Comments</th>
-			<th>Views count</th>
-
-			{% for row in post_stats %}
 				<tr>
-					{% for value  in row %}
-					<td> {{value}}	</td>
-					{% endfor %}		
+					<th>Post link</th>
+					<th>Likes</th>
+					<th>Comments</th>
+					<th>Views</th>
 				</tr>
-			{% endfor %}
-			
-		</table>
-		
+				{% for link  in links_array %}
+					<tr>
+						<td> {{link}}	</td>
+						<td></td>
+						<td></td>
+						<td></td>
+					</tr>
+				{% endfor %}
+		</table>	
 	</div>
 
 	<script type="text/javascript">
+
 		function copytable(el) {
 			var urlField = document.getElementById(el); 
 			var range = document.createRange();
 			range.selectNode(urlField);
 			window.getSelection().addRange(range);
 			document.execCommand('copy');
-		}	
-	</script>
+		}
 
+		function get_stats(medium,media_id,row_index)
+		{
+			const xhttp = new XMLHttpRequest();
+			xhttp.onload = function() {
+			let json_response = this.responseText;
+			
+			json_response = JSON.parse(json_response);
+			
+			var row = document.getElementById("stats_table").rows[row_index].cells;
+			row[0].innerHTML = json_response.post_link;
+			row[1].innerHTML = json_response.likes;
+			row[2].innerHTML = json_response.comments;
+			row[3].innerHTML = json_response.views;
+			}
+			xhttp.open("GET", "waitforit/?medium=" + medium + "&media_id=" + media_id ,false);
+			xhttp.send();	
+		}
+
+
+		function get_media_id_and_mediun(post_link)
+		{
+			var medium = "None";
+			var media_id = "None";
+
+			if(post_link.includes("/p/"))
+			{
+				medium = 'post';
+				media_id = post_link.split("/p/")[1];
+			}
+			else if(post_link.includes("/tv/"))
+			{
+				medium = 'igtv';
+				media_id = post_link.split("/tv/")[1];
+			}
+			else if(post_link.includes("/reel/"))
+			{
+				medium = 'reel';
+				media_id = post_link.split("/reel/")[1];
+			}
+
+			if(media_id.includes("/"))
+			{
+				media_id = media_id.split("/")[0];
+			}
+
+			if(media_id.includes("?"))
+			{
+				media_id = media_id.split("?")[0];
+			}
+			console.log(media_id);
+			return [medium,media_id];
+		}
+
+		function loadDoc()
+		{
+			var number_of_rows = document.getElementById("stats_table").rows.length;
+			
+			for(let i=1;i<number_of_rows;i++)
+			{
+				var row = document.getElementById("stats_table").rows[i].cells;
+				post_link = row[0].innerHTML;
+
+				medium_and_id = get_media_id_and_mediun(post_link);
+				var medium = medium_and_id[0];
+				var media_id = medium_and_id[1];
+				get_stats(medium, media_id,i);
+			}
+			
+			var loader = document.getElementById("loader");
+			loader.style.display = "none";
+
+			var copy_button = document.getElementById("copy_to_cb_button");
+			copy_button.style.display = "block";
+		}
+
+		window.onload = function(){
+			setTimeout(loadDoc, 1000)
+		 };
+
+		</script>
 	</body>
-	</html>
+</html>

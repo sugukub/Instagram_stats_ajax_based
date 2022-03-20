@@ -1,6 +1,8 @@
 from django.urls import path
+
+import page_stats
 from . import views
 
 urlpatterns = [
-path("",views.home_page)
+path("",views.home_page),
 ]

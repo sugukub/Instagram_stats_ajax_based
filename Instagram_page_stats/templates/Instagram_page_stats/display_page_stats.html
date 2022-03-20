@@ -1,3 +1,4 @@
+<!DOCTYPE html>
 <html>
 	<head>
 		<title>Instagram page stats</title>
@@ -27,6 +28,7 @@
 			color: rgba(0,0,0,1); 
 			border: 1px solid white;
 			background: transparent;
+			display:none;
 		}
 
 		#stats_table table
@@ -46,6 +48,29 @@
 			width : 0.1%;
 			color: rgba(0,0,0,0.5); 
 		}
+			
+		#loader {
+			border: 16px solid #f3f3f3;
+			border-radius: 50%;
+			border-top: 16px solid black;
+			border-bottom: 16px solid black;
+			width: 10px;
+			height: 10px;
+			-webkit-animation: spin 2s linear infinite;
+			animation: spin 2s linear infinite;
+			margin:auto;
+			margin-top:3%;
+		}
+
+		@-webkit-keyframes spin {
+			0% { -webkit-transform: rotate(0deg); }
+			100% { -webkit-transform: rotate(360deg); }
+		}
+		  
+		@keyframes spin {
+			0% { transform: rotate(0deg); }
+			100% { transform: rotate(360deg); }
+		}
 		</style>
 	
 	<body>
@@ -54,43 +79,92 @@
 	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 	<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300&display=swap" rel="stylesheet">
 
+	<div id="loader"></div>
+
 	<div>
-		<input type=button value="Copy to Clipboard" onClick="copytable('stats')" id = "copy_to_cb_button">
+		<input type=button value="Copy to Clipboard" onClick="copytable('stats_table')" id = "copy_to_cb_button">
 	</div>
 
-	<div id = "stats_table">
+	<div id = "stats_table_div">
 		
-		<table id="stats">
+		<table id="stats_table">
 			
-			<th>Page Name</th>
-			<th>Private/Public</th>
-			<th>Page Link</th>
-			<th>Followers</th>
-			<th>Avg Likes</th>
-			<th>Avg Comments</th>
-			<th>Avg Eng Rate</th>
-
-			{% for row in page_stats %}
 				<tr>
-					{% for value  in row %}
-					<td> {{value}}	</td>
-					{% endfor %}		
+					<th>Page Name</th>
+					<th>Private/Public</th>
+					<th>Page Link</th>
+					<th>Followers</th>
+					<th>Avg Likes</th>
+					<th>Avg Comments</th>
+					<th>Avg Eng Rate</th>
 				</tr>
-			{% endfor %}
-			
-		</table>
-		
+				{% for name in names_array %}
+					<tr>
+						<td> {{name}}	</td>
+						<td></td>
+						<td></td>
+						<td></td>
+						<td></td>
+						<td></td>
+						<td></td>
+					</tr>
+				{% endfor %}
+		</table>	
 	</div>
 
 	<script type="text/javascript">
+
 		function copytable(el) {
 			var urlField = document.getElementById(el); 
 			var range = document.createRange();
 			range.selectNode(urlField);
 			window.getSelection().addRange(range);
 			document.execCommand('copy');
-		}	
-	</script>
+		}
 
+		function get_stats(page_name,row_index)
+		{
+			const xhttp = new XMLHttpRequest();
+			xhttp.onload = function() {
+			let json_response = this.responseText;
+			
+			json_response = JSON.parse(json_response);
+			
+			var row = document.getElementById("stats_table").rows[row_index].cells;
+			row[0].innerHTML = json_response.page_name;
+			row[1].innerHTML = json_response.private_public;
+			row[2].innerHTML = json_response.page_link;
+			row[3].innerHTML = json_response.followers;
+			row[4].innerHTML = json_response.avg_likes;
+			row[5].innerHTML = json_response.avg_comments;
+			row[6].innerHTML = json_response.avg_eng_rate;
+			}
+			xhttp.open("GET", "waitforit/" + page_name,false);
+			xhttp.send();	
+		}
+
+		function loadDoc()
+		{
+			var number_of_rows = document.getElementById("stats_table").rows.length;
+			var names_array = [];
+			for(let i=1;i<number_of_rows;i++)
+			{
+				var row = document.getElementById("stats_table").rows[i].cells;
+				page_name = row[0].innerHTML;
+				get_stats(page_name,i);
+			}
+			
+			var loader = document.getElementById("loader");
+			loader.style.display = "none";
+
+			var copy_button = document.getElementById("copy_to_cb_button");
+			copy_button.style.display = "block";
+		}
+
+		window.onload = function(){
+			setTimeout(loadDoc, 5000)
+		 };
+
+		</script>
 	</body>
-	</html>
+</html>
