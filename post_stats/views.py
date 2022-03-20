@@ -1,6 +1,5 @@
 from django.shortcuts import render,redirect
 from django.http import HttpResponse,JsonResponse
-from numpy import number
 from . import instagram_post_stats
 
 session_global = None
