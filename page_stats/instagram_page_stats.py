@@ -4,7 +4,6 @@ import re
 import requests
 from datetime import datetime
 import time
-from sqlalchemy import over
 
 def numbers_into_k(val):
     val = str(val.replace(",",""))
