@@ -84,7 +84,7 @@
 	<div>
 		<input type=button value="Copy to Clipboard" onClick="copytable('stats_table')" id = "copy_to_cb_button">
 	</div>
-
+	<br/><br/>
 	<div id = "stats_table_div">
 		
 		<table id="stats_table">
@@ -108,7 +108,11 @@
 
 	<script type="text/javascript">
 
-		function copytable(el) {
+		var stats_array = [];
+		var post_links_array = [];
+
+		function copytable(el) 
+		{
 			var urlField = document.getElementById(el); 
 			var range = document.createRange();
 			range.selectNode(urlField);
@@ -121,25 +125,38 @@
 			const xhttp = new XMLHttpRequest();
 			xhttp.onload = function() {
 			let json_response = this.responseText;
-			
 			json_response = JSON.parse(json_response);
-			
-			var row = document.getElementById("stats_table").rows[row_index].cells;
-			row[0].innerHTML = json_response.post_link;
-			row[1].innerHTML = json_response.likes;
-			row[2].innerHTML = json_response.comments;
-			row[3].innerHTML = json_response.views;
+			json_response['row_index'] = row_index;
+			stats_array.push(json_response);
 			}
 			xhttp.open("GET", "waitforit/?medium=" + medium + "&media_id=" + media_id ,false);
 			xhttp.send();	
 		}
 
 
-		function get_media_id_and_mediun(post_link)
+		function fill_table_with_stats()
+		{
+			for(let i=0;i<stats_array.length;i++)
+			{
+				let post_link = stats_array[i].post_link;
+				let json_response = stats_array[i];
+				post_link = post_link.replace(" ","");
+				console.log(post_link);
+				let row_index = post_links_array.indexOf(post_link);
+				row_index = row_index + 1 ;
+				console.log(row_index);
+				var row = document.getElementById("stats_table").rows[row_index].cells;
+				row[0].innerHTML = json_response.post_link;
+				row[1].innerHTML = json_response.likes;
+				row[2].innerHTML = json_response.comments;
+				row[3].innerHTML = json_response.views;
+			}
+		}
+
+		function get_media_id_and_medium(post_link)
 		{
 			var medium = "None";
 			var media_id = "None";
-
 			if(post_link.includes("/p/"))
 			{
 				medium = 'post';
@@ -177,13 +194,17 @@
 			{
 				var row = document.getElementById("stats_table").rows[i].cells;
 				post_link = row[0].innerHTML;
-
-				medium_and_id = get_media_id_and_mediun(post_link);
+				post_link = post_link.replace("\t","");
+				post_link = post_link.replace(" ","");
+				medium_and_id = get_media_id_and_medium(post_link);
 				var medium = medium_and_id[0];
 				var media_id = medium_and_id[1];
-				get_stats(medium, media_id,i);
+				post_links_array.push(post_link);
+				get_stats(medium, media_id,i);	
 			}
-			
+
+			setTimeout(fill_table_with_stats, 5000);
+
 			var loader = document.getElementById("loader");
 			loader.style.display = "none";
 
@@ -192,7 +213,7 @@
 		}
 
 		window.onload = function(){
-			setTimeout(loadDoc, 1000)
+			setTimeout(loadDoc, 3000)
 		 };
 
 		</script>
