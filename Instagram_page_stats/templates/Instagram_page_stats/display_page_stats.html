@@ -84,6 +84,7 @@
 	<div>
 		<input type=button value="Copy to Clipboard" onClick="copytable('stats_table')" id = "copy_to_cb_button">
 	</div>
+	<br/><br/>
 
 	<div id = "stats_table_div">
 		
@@ -113,8 +114,11 @@
 	</div>
 
 	<script type="text/javascript">
+		var stats_array = [];
+		var page_names_array = [];
 
-		function copytable(el) {
+		function copytable(el) 
+		{
 			var urlField = document.getElementById(el); 
 			var range = document.createRange();
 			range.selectNode(urlField);
@@ -125,46 +129,59 @@
 		function get_stats(page_name,row_index)
 		{
 			const xhttp = new XMLHttpRequest();
-			xhttp.onload = function() {
-			let json_response = this.responseText;
-			
-			json_response = JSON.parse(json_response);
-			
-			var row = document.getElementById("stats_table").rows[row_index].cells;
-			row[0].innerHTML = json_response.page_name;
-			row[1].innerHTML = json_response.private_public;
-			row[2].innerHTML = json_response.page_link;
-			row[3].innerHTML = json_response.followers;
-			row[4].innerHTML = json_response.avg_likes;
-			row[5].innerHTML = json_response.avg_comments;
-			row[6].innerHTML = json_response.avg_eng_rate;
+			xhttp.onload = function() 
+			{		
+				let json_response = this.responseText;	
+				json_response = JSON.parse(json_response);
+				json_response['row_index'] = row_index;
+				stats_array.push(json_response);
 			}
 			xhttp.open("GET", "waitforit/" + page_name,false);
 			xhttp.send();	
 		}
 
+		function fill_table_with_stats()
+		{
+			for(let i=0;i<stats_array.length;i++)
+			{
+				let page = stats_array[i].page_name;
+				let json_response = stats_array[i];
+				page = page.replace(" ","");
+				let row_index = page_names_array.indexOf(page);
+				row_index = row_index +1 ;
+				var row = document.getElementById("stats_table").rows[row_index].cells;
+				row[0].innerHTML = json_response.page_name;
+				row[1].innerHTML = json_response.private_public;
+				row[2].innerHTML = json_response.page_link;
+				row[3].innerHTML = json_response.followers;
+				row[4].innerHTML = json_response.avg_likes;
+				row[5].innerHTML = json_response.avg_comments;
+				row[6].innerHTML = json_response.avg_eng_rate;
+			}
+		}
+
 		function loadDoc()
 		{
 			var number_of_rows = document.getElementById("stats_table").rows.length;
-			var names_array = [];
 			for(let i=1;i<number_of_rows;i++)
 			{
 				var row = document.getElementById("stats_table").rows[i].cells;
 				page_name = row[0].innerHTML;
-				const myTimeout = setTimeout(get_stats(page_name,i), 1000);
+				page_name = page_name.replace("\t","");
+				page_name = page_name.replace(" ","");
+				page_names_array.push(page_name);
+				get_stats(page_name,i);
 			}
 			
+			setTimeout(fill_table_with_stats, 5000);
 			var loader = document.getElementById("loader");
 			loader.style.display = "none";
-
 			var copy_button = document.getElementById("copy_to_cb_button");
 			copy_button.style.display = "block";
 		}
-
 		window.onload = function(){
-			setTimeout(loadDoc, 5000)
+			setTimeout(loadDoc, 3000);
 		 };
-
 		</script>
 	</body>
 </html>
