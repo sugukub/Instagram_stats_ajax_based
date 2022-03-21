@@ -151,7 +151,7 @@
 			{
 				var row = document.getElementById("stats_table").rows[i].cells;
 				page_name = row[0].innerHTML;
-				get_stats(page_name,i);
+				const myTimeout = setTimeout(get_stats(page_name,i), 1000);
 			}
 			
 			var loader = document.getElementById("loader");
