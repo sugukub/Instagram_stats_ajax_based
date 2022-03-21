@@ -1,8 +1,19 @@
 from django.shortcuts import render,redirect
 from django.http import HttpResponse,JsonResponse
-from . import instagram_post_stats
+from . import instagram_page_stats
 
 session_global = None
+
+def get_page_name(link):
+    
+    page_name = link.split(".com/")[1]
+    if "?" in page_name:
+        page_name = page_name.split("?")[0]
+    if "/" in link:
+        page_name = page_name.split("/")[0]
+    page_name = page_name.replace("\r","")
+        
+    return page_name
 
 # Create your views here.
 def home_page(request):    
@@ -18,48 +29,33 @@ def home_page(request):
             request.session['username'] = username
             request.session['password'] = password
 
-            logged_in,session = instagram_post_stats.login_function(request,username,password)
+            logged_in,session = instagram_page_stats.login_function(request,username,password)
             
             session_global = session
-            links_array = input_links.split("\n")
-            
-            
+
             if logged_in:
                 links_array = input_links.split("\n")
-                return render(request, "Instagram_post_stats/display_post_stats.html", {'links_array':links_array} )    
+                names_array = list(map(get_page_name,links_array))
+                print(names_array)
+                return render(request, "Instagram_page_stats/display_page_stats.html", {'names_array':names_array} )    
             else:
-                return render(request, "Instagram_post_stats/display_post_stats.html", {'links_array':[]} )
+                return render(request, "Instagram_page_stats/display_page_stats.html", {'names_array':[]} )
             
     elif request.method == "GET":
-        return render(request, "Instagram_post_stats/home_page.html", {})
+        return render(request, "Instagram_page_stats/home_page.html", {})
 
-
-def waitforit_page(request):
-
-    medium = request.GET.get('medium', None)
-    media_id = request.GET.get('media_id', None)
-        
-    global session_global
-    print(medium,media_id)
-    medium = medium.replace(" ","")
-    media_id = media_id.replace(" ","")
+def waitforit_page(request,page_name):
     
-    if medium == 'None':
-        stats_dict = {
-            'post_link':'Not available',
-            'likes':'Not available',
-            'comments':'Not available',
-            'views':'Not available'
-        }    
-        
-        return JsonResponse(stats_dict)
-
-
-    post_link,likes,comments,views = instagram_post_stats.get_post_stats(medium,media_id,session_global)
+    global session_global
+    page_name = page_name.replace(" ","")
+    page_name,is_private,page_url,followers,average_likes,average_comments,average_engagement_rate = instagram_page_stats.get_account_stats(page_name,session_global)
     stats_dict = {
-        'post_link':post_link,
-        'likes':likes,
-        'comments':comments,
-        'views':views
+        'page_name':str(page_name),
+        'private_public':is_private,
+        'page_link':page_url,
+        'followers':followers,
+        'avg_likes':average_likes,
+        'avg_comments':average_comments,
+        'avg_eng_rate':average_engagement_rate
     }
     return JsonResponse(stats_dict)
