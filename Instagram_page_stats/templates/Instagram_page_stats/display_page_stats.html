@@ -134,7 +134,8 @@
 				let json_response = this.responseText;	
 				json_response = JSON.parse(json_response);
 				json_response['row_index'] = row_index;
-				stats_array.push(json_response);
+				console.log(row_index, json_response);
+				return json_response;
 			}
 			xhttp.open("GET", "waitforit/" + page_name,false);
 			xhttp.send();	
@@ -170,7 +171,8 @@
 				page_name = page_name.replace("\t","");
 				page_name = page_name.replace(" ","");
 				page_names_array.push(page_name);
-				get_stats(page_name,i);
+				var jr = get_stats(page_name,i);
+				stats_array.push(jr);
 			}
 			
 			setTimeout(fill_table_with_stats, 15000);
